@@ -1,6 +1,6 @@
 # GigE-Cam-Simulator
 
-This is a GigE Camera Simulator written in C#.
+This is a GigE Camera Simulator written in C#
 
 --> Not working!
 
@@ -14,3 +14,6 @@ https://www.visiononline.org/userAssets/aiaUploads/File/GigE_Vision_Specificatio
 ## Inspired by
 - [Aravis](https://github.com/AravisProject/aravis)
 - [tualo / gigecamera-simulator](https://github.com/tualo/gigecamera-simulator)
+
+see also:
+- https://github.com/Strongc/VirtualGEVCam
