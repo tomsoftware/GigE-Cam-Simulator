@@ -18,13 +18,13 @@
             {
                 var address = (int)message.ReadIntBE();
                 var data = message.ReadBytes(4);
-                var register = registers.FindRegisterTypeByAddress(address);
+                var register = RegisterTypeHelper.RegisterByAddress(address);
 
-                Console.WriteLine("    write: " + address.ToString("x") + " --> " + register + " = " + data);
+                Console.WriteLine("    write: " + address.ToString("x") + " --> " + register.TypeName + " = " + string.Join(", ", data));
 
                 registers.WriteBytes(address, data);
 
-                registers.TriggerWriteCallback(register);
+                // registers.TriggerWriteCallback(register);
 
                 this.index++;
             }

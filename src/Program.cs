@@ -4,10 +4,13 @@
     {
         static void Main(string[] args)
         {
-            var file1 = "D:\\Thomas\\GigE-Cam-simulator\\GigE-Cam-Simulator\\GigE-Cam-Simulator\\data\\arv-fake-camera.xml";
-            var file2 = "D:\\Thomas\\GigE-Cam-simulator\\GigE-Cam-Simulator\\GigE-Cam-Simulator\\data\\camera.xml";
+            var path = "D:\\Thomas\\GigE-Cam-simulator\\GigE-Cam-Simulator\\GigE-Cam-Simulator\\data\\";
+            var cameraXml = Path.Combine(path, "camera.xml");
+            var memoryXml = Path.Combine(path, "memory.xml");
 
-            var server = new Server(file1);
+            var memory = new RegisterConfig(memoryXml);
+
+            var server = new Server(cameraXml, memory);
    
             server.Run();
 

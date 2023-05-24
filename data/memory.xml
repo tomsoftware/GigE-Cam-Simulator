@@ -1,0 +1,46 @@
+<memory>
+	<property>
+		<register>Manufacturer_name</register>
+		<string>Example.ORG</string>
+	</property>
+	<property>
+		<register>Model_name</register>
+		<string>gige sim</string>
+	</property>
+	<property>
+		<register>Device_version</register>
+		<string>v0.1.2</string>
+	</property>
+	<property>
+		<register>Manufacturer_specific_information</register>
+		<string>my fake cam</string>
+	</property>
+	<property>
+		<register>Serial_number</register>
+		<string>0123456789</string>
+	</property>
+	<property>
+		<register>User_defined_name</register>
+		<string>The quick brown fox jumps over a lazy dog</string>
+	</property>
+	<property>
+		<register>XML_Device_Description_File_Second_URL</register>
+		<string>http://example.org</string>
+	</property>
+	<property>
+		<register>GVCP_Capability</register>
+		<bit>0</bit>
+		<bit>1</bit>
+		<bit>4</bit>
+		<bit>29</bit>
+		<bit>30</bit>
+	</property>
+	<!-- // https://github.com/AravisProject/aravis/blob/eb948f080775f9ff78ad6d1fa053aff9e5e2abc9/src/arvfakecamera.c#L1076 -->
+	
+	<property>
+		<register>Number_of_Stream_channels</register>
+		<int>1</int>
+	</property>
+	
+	
+</memory>

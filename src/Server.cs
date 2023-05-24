@@ -42,7 +42,7 @@ namespace GigE_Cam_Simulator
         private NetworkInterface iface;
         private UdpClient server;
 
-        public Server(string address, string camXmlFileName)
+        public Server(string address, string camXmlFileName, RegisterConfig preSetMemory)
         {
             this.Address = address;
 
@@ -54,12 +54,12 @@ namespace GigE_Cam_Simulator
 
             this.xml = File.ReadAllBytes(camXmlFileName);
 
-            this.InitRegisters();
+            this.InitRegisters(preSetMemory);
         }
 
-        private void InitRegisters()
+        private void InitRegisters(RegisterConfig preSetMemory)
         {
-            this.registers.SetValue(RegisterTypes.Version, 0x0100);
+            this.registers.SetIntBE(RegisterTypes.Version, 0x0100);
 
             this.registers.SetBit(RegisterTypes.Device_Mode, 0, true);
             this.registers.SetBit(RegisterTypes.Device_Mode, 1, true);
@@ -79,97 +79,36 @@ namespace GigE_Cam_Simulator
             }
 
             // set IP and network addresses
-           
             this.registers.SetBytes(RegisterTypes.Current_IP_address_Network_interface_0, ipInfo.Address.GetAddressBytes());
             this.registers.SetBytes(RegisterTypes.Current_subnet_mask_Network_interface_0, ipInfo.IPv4Mask.GetAddressBytes());
-            this.registers.SetValue(RegisterTypes.Number_of_network_interfaces, 1);
-            this.registers.WriteBytes(0x0A14, ipInfo.Address.GetAddressBytes()); //set IP
+            this.registers.SetIntBE(RegisterTypes.Number_of_network_interfaces, 1);
+            this.registers.SetBytes(RegisterTypes.Primary_Application_IP_address, ipInfo.Address.GetAddressBytes()); //set IP
 
-            this.registers.RegisterWriteCallback(RegisterTypes.CCP_Control_Channel_Privilege, OnControlChannelPrivilegeChanged);
-
-
-            // set model infos
-            this.registers.SetString(RegisterTypes.Manufacturer_name, "Example.ORG");
-            this.registers.SetString(RegisterTypes.Model_name, "gige sim");
-            this.registers.SetString(RegisterTypes.Device_version, "gige sim  v1.0");
-            this.registers.SetString(RegisterTypes.Manufacturer_specific_information, "gige sim  v1.0");
-            this.registers.SetString(RegisterTypes.Serial_number, "0123456789");
-            this.registers.SetString(RegisterTypes.User_defined_name, "nothing to say");
-
-            // xml description
-            var cnf_address = 0x1C400;
-            this.registers.SetString(RegisterTypes.First_choice_of_URL_for_XML_device_description_file, "Local:camera.xml;" + ToHexString(cnf_address) + ";" + ToHexString(this.xml.Length));
-            this.registers.SetString(RegisterTypes.Second_choice_of_URL_for_XML_device_description_file, "http://example.org");
-
-            this.registers.WriteBytes(cnf_address, this.xml);
-
-            // set Capabilities
-            this.registers.SetBit(RegisterTypes.GVCP_Capability, 0, true);
-            this.registers.SetBit(RegisterTypes.GVCP_Capability, 1, true);
-            this.registers.SetBit(RegisterTypes.GVCP_Capability, 4, true);
-            this.registers.SetBit(RegisterTypes.GVCP_Capability, 29, true);
-            this.registers.SetBit(RegisterTypes.GVCP_Capability, 30, true);
-
-            // additinal
-            this.registers.WriteIntBE(0x0D04, 1500); // mtu / packed size
-            this.registers.WriteIntBE(0x30224, 1); // image height
-
-
-            this.registers.WriteIntBE(0x40004, 0); // AcquisitionMode
-            this.registers.WriteIntBE(0x40024, 0); // AcquisitionStart
-            this.registers.WriteIntBE(0x40044, 0); // AcquisitionStop
-            this.registers.WriteIntBE(0x60004, 0); // invalidator
-
-            this.registers.WriteIntBE(0x40448, 1); // exposure scaling
-            this.registers.WriteIntBE(0x40440, 1); // exposure using 1000
-
-            this.registers.WriteIntBE(0x40424, 0); // exposure mode, off
-
-
-            this.registers.WriteIntBE(0x40464, 1000); // exposure time raw
-            this.registers.WriteIntBE(0x40468, 10);  // exposure time min
-            this.registers.WriteIntBE(0x4046c, 100000);  // exposure time max
-            this.registers.WriteIntBE(0x40470, 10);  // exposure time inc
-
-            // available exposure modes
-            this.registers.WriteBit(0x4042c, 0, true); // off available
-            this.registers.WriteBit(0x4042c, 1, true); // once available
-            this.registers.WriteBit(0x4042c, 2, false); // continuous available
-
-            // exposure mode available
-            this.registers.WriteBit(0x40420, 1, true);
-
-            // exposure mode available
-            this.registers.WriteBit(0x40460, 0, true); // ExposureTimeRaw implemented
-            this.registers.WriteBit(0x40460, 1, true); // ExposureTimeRaw available
-            this.registers.WriteBit(0x40460, 3, false); // ExposureTimeRaw locked
-
-        }
-
-        private void OnControlChannelPrivilegeChanged(RegisterMemory register)
-        {
-            Console.WriteLine("--> Access changed: " + register.GetValue(RegisterTypes.CCP_Control_Channel_Privilege));
-            // register.SetValue(RegisterTypes.CCP_Control_Channel_Privilege, 0);
-        }
-        
-
-        private bool IsBradCastAddress(IPEndPoint endpoint)
-        {
-            // check if message was sent to a broadcast address  
-            if (endpoint.Address.AddressFamily != AddressFamily.InterNetwork)
+            foreach (var property in preSetMemory.Properties)
             {
-                // check if IPv4
-                return false;
+                if (property.IsString)
+                {
+                    this.registers.SetString(property.Register, property.StringValue);
+                }
+                else if (property.IsBits)
+                {
+                    foreach(var bitIndex in property.Bits)
+                    {
+                        this.registers.SetBit(property.Register, bitIndex, true);
+                    }
+                }
+                else if (property.IsInt)
+                {
+                    this.registers.SetIntBE(property.Register, property.IntValue);
+                }
             }
 
-            var ipBytes = endpoint.Address.GetAddressBytes();
-            if (ipBytes[3] == 255) // last byte is 255  
-            {
-                return  true;
-            }
-
-            return false;
+            // xml manifest / description
+            var manifestFileaddress = 0x1C400;
+            this.registers.SetString(RegisterTypes.XML_Device_Description_File_First_URL, "Local:camera.xml;" + ToHexString(manifestFileaddress) + ";" + ToHexString(this.xml.Length));
+            this.registers.WriteBytes(manifestFileaddress, this.xml);
         }
+
 
         private bool IsDirectAddress(IPEndPoint endpoint)
         {
@@ -268,8 +207,8 @@ namespace GigE_Cam_Simulator
             return num.ToString("X");
         }
 
-        public Server(string camXmlFileName):
-            this("0.0.0.0", camXmlFileName)
+        public Server(string camXmlFileName, RegisterConfig preSetMemory) :
+            this("0.0.0.0", camXmlFileName, preSetMemory)
         {
         }
 

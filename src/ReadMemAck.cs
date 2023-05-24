@@ -27,8 +27,9 @@ namespace GigE_Cam_Simulator
 
             this.resultData = registers.GetBytes(address, count);
             this.address = (uint)address;
+            var register = RegisterTypeHelper.RegisterByAddress(address);
 
-            Console.WriteLine("    read: " + address.ToString("x") + " --> " + registers.FindRegisterTypeByAddress(address) + " = " + ByteToString(this.resultData));
+            Console.WriteLine("    read: " + address.ToString("x") + " --> " + register.TypeName + " = " + ByteToString(this.resultData));
 
        
         }

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GigE_Cam_Simulator
+﻿namespace GigE_Cam_Simulator
 {
     public enum RegisterTypes
     {
@@ -25,8 +19,8 @@ namespace GigE_Cam_Simulator
         Manufacturer_specific_information,
         Serial_number,
         User_defined_name,
-        First_choice_of_URL_for_XML_device_description_file,
-        Second_choice_of_URL_for_XML_device_description_file,
+        XML_Device_Description_File_First_URL,
+        XML_Device_Description_File_Second_URL,
         Number_of_network_interfaces,
         Persistent_IP_address_Network_interface_0,
         Persistent_subnet_mask_Network_interface_0,
@@ -66,6 +60,9 @@ namespace GigE_Cam_Simulator
         Persistent_default_gateway_Network_interface_3,
         Link_Speed_Network_interface_3,
         Number_of_Message_channels,
+        /// <summary>
+        /// This register reports the number of stream channels supported by this device.
+        /// </summary>
         Number_of_Stream_channels,
         Number_of_Action_Signals,
         Action_Device_Key,
@@ -84,6 +81,9 @@ namespace GigE_Cam_Simulator
         Control_Switchover_Key,
         CCP_Control_Channel_Privilege,
         Primary_Application_Port,
+        /// <summary>
+        /// This optional register provides IP address information about the primary application holding the control channel privilege.
+        /// </summary>
         Primary_Application_IP_address,
         MCP,
         MCDA,
@@ -118,7 +118,5 @@ namespace GigE_Cam_Simulator
         ACTION_GROUP_MASK1,
         ACTION_GROUP_KEY127,
         ACTION_GROUP_MASK127,
-
-        LAST_ITEM
     }
 }

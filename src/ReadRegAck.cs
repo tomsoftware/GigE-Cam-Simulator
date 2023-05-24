@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Security.Cryptography;
 
 namespace GigE_Cam_Simulator
@@ -17,10 +18,11 @@ namespace GigE_Cam_Simulator
             var resultData = new BufferReader(message.Length);
             while (!message.Eof)
             {
-                var registerAddress = (int)message.ReadIntBE();
-                Console.WriteLine("    read: " + registerAddress.ToString("x") + " --> " + registers.FindRegisterTypeByAddress(registerAddress) + " = " + registers.ReadIntBE(registerAddress));
+                var address = (int)message.ReadIntBE();
+                var register = RegisterTypeHelper.RegisterByAddress(address);
+                Console.WriteLine("    read: " + address.ToString("x") + " --> " + register.TypeName + " = " + registers.ReadIntBE(address));
                 
-                var data = registers.GetBytes(registerAddress, 4);
+                var data = registers.GetBytes(address, 4);
                 resultData.WriteBytes(data, 4);
             }
 
