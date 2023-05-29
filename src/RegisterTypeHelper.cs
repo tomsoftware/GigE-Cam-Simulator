@@ -95,6 +95,8 @@ namespace GigE_Cam_Simulator
         {
             var values = new List<RegisterInfo>
             {
+                // https://www.visiononline.org/userAssets/aiaUploads/File/GigE_Vision_Specification_2-0-03.pdf
+                // page: 324
                 new RegisterInfo(RegisterTypes.Version, 0x0000, 4),
                 new RegisterInfo(RegisterTypes.Device_Mode, 0x0004, 4),
                 new RegisterInfo(RegisterTypes.Device_MAC_address_High_Network_interface_0, 0x0008, 4),
@@ -167,7 +169,7 @@ namespace GigE_Cam_Simulator
                 new RegisterInfo(RegisterTypes.GVCP_Configuration, 0x0954, 4),
                 new RegisterInfo(RegisterTypes.Pending_Timeout, 0x0958, 4),
                 new RegisterInfo(RegisterTypes.Control_Switchover_Key, 0x095C, 4),
-                new RegisterInfo(RegisterTypes.CCP_Control_Channel_Privilege, 0x0A00, 4),
+                new RegisterInfo(RegisterTypes.Control_Channel_Privilege, 0x0A00, 4), // CCP
                 new RegisterInfo(RegisterTypes.Primary_Application_Port, 0x0A04, 4),
                 new RegisterInfo(RegisterTypes.Primary_Application_IP_address, 0x0A14, 4),
                 new RegisterInfo(RegisterTypes.MCP, 0x0B00, 4),
@@ -175,10 +177,10 @@ namespace GigE_Cam_Simulator
                 new RegisterInfo(RegisterTypes.MCTT, 0x0B14, 4),
                 new RegisterInfo(RegisterTypes.MCRC, 0x0B18, 4),
                 new RegisterInfo(RegisterTypes.MCSP, 0x0B1C, 4),
-                new RegisterInfo(RegisterTypes.SCP0, 0x0D00, 4),
-                new RegisterInfo(RegisterTypes.SCPS0, 0x0D04, 4),
+                new RegisterInfo(RegisterTypes.Stream_Channel_Port_0, 0x0D00, 4),
+                new RegisterInfo(RegisterTypes.Stream_Channel_Packet_Size_0, 0x0D04, 4), // SCPS0
                 new RegisterInfo(RegisterTypes.SCPD0, 0x0D08, 4),
-                new RegisterInfo(RegisterTypes.SCDA0, 0x0D18, 4),
+                new RegisterInfo(RegisterTypes.Stream_Channel_Destination_Address_0, 0x0D18, 4), // SCDA0
                 new RegisterInfo(RegisterTypes.SCSP0, 0x0D1C, 4),
                 new RegisterInfo(RegisterTypes.SCC0, 0x0D20, 4),
                 new RegisterInfo(RegisterTypes.SCCFG0, 0x0D24, 4),

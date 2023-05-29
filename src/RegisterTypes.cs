@@ -79,7 +79,7 @@
         GVCP_Configuration,
         Pending_Timeout,
         Control_Switchover_Key,
-        CCP_Control_Channel_Privilege,
+        Control_Channel_Privilege,
         Primary_Application_Port,
         /// <summary>
         /// This optional register provides IP address information about the primary application holding the control channel privilege.
@@ -90,10 +90,10 @@
         MCTT,
         MCRC,
         MCSP,
-        SCP0,
-        SCPS0,
+        Stream_Channel_Port_0,
+        Stream_Channel_Packet_Size_0,
         SCPD0,
-        SCDA0,
+        Stream_Channel_Destination_Address_0,
         SCSP0,
         SCC0,
         SCCFG0,

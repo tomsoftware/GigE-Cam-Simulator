@@ -7,7 +7,7 @@ namespace GigE_Cam_Simulator
     {
         public string RegisterName { get; }
         public RegisterTypes Register => RegisterTypeHelper.RegisterTypeByName(this.RegisterName);
-        public int RegisterAddress => RegisterTypeHelper.RegisterByType(this.Register).Address;
+        public int RegisterAddress { get; }
 
         public string StringValue { get; set; }
         public bool IsString { get; set; }
@@ -19,9 +19,19 @@ namespace GigE_Cam_Simulator
         public bool IsBits { get; set; }
 
 
-        public PropertyItem(string registerName)
+        public PropertyItem(string registerNameOrAddress)
         {
-            this.RegisterName = registerName;
+            if (registerNameOrAddress.Substring(0, 2) == "0x")
+            {
+                this.RegisterName = registerNameOrAddress;
+                this.RegisterAddress = int.Parse(registerNameOrAddress.Substring(2), System.Globalization.NumberStyles.HexNumber);
+            }
+            else
+            {
+                this.RegisterName = registerNameOrAddress;
+                this.RegisterAddress = RegisterTypeHelper.RegisterByType(RegisterTypeHelper.RegisterTypeByName(registerNameOrAddress)).Address;
+            }
+            
         }
 
     }

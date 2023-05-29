@@ -3,31 +3,34 @@
     using System;
     using System.Text;
 
-
     public class RegisterMemory
     {
         private BufferReader data;
+        Dictionary<int, Action<RegisterMemory>> writeRegisterHock = new Dictionary<int, Action<RegisterMemory>>();
 
-        public byte GetByte(RegisterTypes register, int index)
+        public byte ReadByte(RegisterTypes register, int index)
         {
             var address = RegisterTypeHelper.RegisterByType(register).Address + index;
             return data.GetByte(address);
         }
 
-        public void SetByte(RegisterTypes register, int index, byte value)
+        public void ReadByte(RegisterTypes register, int index, byte value)
         {
             var address = RegisterTypeHelper.RegisterByType(register).Address + index;
             data.SetByte(address, value);
+            this.TriggerWriteHock(address);
         }
 
         public void WriteBytes(int address, byte[] values)
         {
             data.SetBytes(address, values, values.Length);
+            this.TriggerWriteHock(address);
         }
 
         public void WriteIntBE(int address, int value)
         { 
             data.SetIntBE(address, value);
+            this.TriggerWriteHock(address);
         }
 
         public uint ReadIntBE(int address)
@@ -40,25 +43,25 @@
             var reg = RegisterTypeHelper.RegisterByType(register);
             return this.ReadIntBE(reg.Address);
         }
-        public void SetIntBE(RegisterTypes register, int value)
+        public void WriteIntBE(RegisterTypes register, int value)
         {
             var reg = RegisterTypeHelper.RegisterByType(register);
             this.WriteIntBE(reg.Address, value);
         }
 
-        public byte[] GetBytes(int address, int lenght)
+        public byte[] ReadBytes(int address, int lenght)
         {
             return this.data.GetBytes(address, lenght);
         }
 
-        public byte[] GetBytes(RegisterTypes register)
+        public byte[] ReadBytes(RegisterTypes register)
         {
             var reg = RegisterTypeHelper.RegisterByType(register);
             return this.data.GetBytes(reg.Address, reg.Length);
         }
 
 
-        public void SetBytes(RegisterTypes register, byte[] values)
+        public void WriteBytes(RegisterTypes register, byte[] values)
         {
             var reg = RegisterTypeHelper.RegisterByType(register);
             var address = reg.Address;
@@ -70,30 +73,57 @@
             
             // clear buffer
             this.data.SetNull(address + l, l - reg.Length);
-           
-            address += reg.Length;
+
+            this.TriggerWriteHock(address);
         }
 
         public void WriteBit(int address, int index, bool value)
         {
             this.data.SetBit(address, index, value);
+
+            this.TriggerWriteHock(address);
         }
 
-        public void SetBit(RegisterTypes register, int index, bool value)
+        public void WriteBit(RegisterTypes register, int index, bool value)
         {
             var address = RegisterTypeHelper.RegisterByType(register).Address;
             this.data.SetBit(address, index, value);
+
+            this.TriggerWriteHock(address);
         }
 
-        public void SetString(RegisterTypes register, string value)
+        public void WriteString(RegisterTypes register, string value)
         {
-            SetBytes(register, ASCIIEncoding.ASCII.GetBytes(value));
+            var reg = RegisterTypeHelper.RegisterByType(register);
+            var charData = ASCIIEncoding.ASCII.GetBytes(value);
+            if (charData.Length >= reg.Length)
+            {
+                // force NULL termination
+                charData[reg.Length - 1] = 0;
+            }
+            WriteBytes(register, charData);
         }
 
-        public string GetString(RegisterTypes register)
+        public string ReadString(RegisterTypes register)
         {
             var reg = RegisterTypeHelper.RegisterByType(register);
             return this.data.GetString(reg.Address, reg.Length);
+        }
+
+        /// <summary>
+        /// Register a callback that is triggered when data is written to a given address
+        /// </summary>
+        public void AddWriteRegisterHock(int address, Action<RegisterMemory> callback)
+        {
+            this.writeRegisterHock.Add(address, callback);
+        }
+
+        private void TriggerWriteHock(int address)
+        {
+            if (this.writeRegisterHock.TryGetValue(address, out var callback))
+            {
+                callback(this);
+            }
         }
 
         public RegisterMemory(int size)
