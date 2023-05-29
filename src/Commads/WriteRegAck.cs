@@ -1,4 +1,4 @@
-﻿namespace GigE_Cam_Simulator
+﻿namespace GigE_Cam_Simulator.Commads
 {
 
     /// <summary>
@@ -7,10 +7,10 @@
     /// </summary>
     public class WriteRegAck : GvcpAck
     {
-        int index;
+        readonly uint index;
 
         public WriteRegAck(uint req_id, RegisterMemory registers, BufferReader message) :
-            base(req_id, ArvGvcpPacketType.ARV_GVCP_PACKET_TYPE_ACK, ArvGvcpCommand.ARV_GVCP_COMMAND_WRITE_REGISTER_ACK)
+            base(req_id, GvcpPacketType.GVCP_PACKET_TYPE_ACK, ArvGvcpCommand.GVCP_COMMAND_WRITE_REGISTER_ACK)
         {
             this.index = 0;
 
@@ -24,15 +24,13 @@
 
                 registers.WriteBytes(address, data);
 
-                // registers.TriggerWriteCallback(register);
-
                 this.index++;
             }
         }
 
         public BufferReader ToBuffer()
         {
-            var b = base.CreateBuffer(4);
+            var b = CreateBuffer(4);
 
             b.WriteWordBE(0); // reserved
             b.WriteWordBE(this.index);

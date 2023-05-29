@@ -24,11 +24,11 @@
             this.buffer = buffer;
         }
 
-        public void WriteWordBE(int value)
+        public void WriteWordBE(uint value)
         {
             this.buffer[this.bufferPos] = (byte)((value >> 8) & 0xFF);
             this.bufferPos++;
-            this.buffer[this.bufferPos] = (byte)(value & 0xFF); 
+            this.buffer[this.bufferPos] = (byte)(value & 0xFF);
             this.bufferPos++;
         }
 
@@ -52,6 +52,7 @@
             offset++;
             this.buffer[offset] = (byte)((value >> 0) & 0xFF);
         }
+
         public void WriteIntBE(uint value)
         {
             this.buffer[this.bufferPos] = (byte)((value >> 24) & 0xFF);
@@ -63,6 +64,7 @@
             this.buffer[this.bufferPos] = (byte)((value >> 0) & 0xFF);
             this.bufferPos++;
         }
+
         public uint ReadIntBE()
         {
             uint b1 = this.buffer[this.bufferPos];
@@ -133,6 +135,13 @@
         public void WriteString(string value, int length)
         {
             byte[] bytes = Encoding.ASCII.GetBytes(value);
+   
+            if (bytes.Length >= length)
+            {
+                // force NULL termination
+                bytes[length - 1] = 0;
+            }
+
             WriteBytes(bytes, length);
             WriteNull(Math.Max(0, length - bytes.Length));
         }

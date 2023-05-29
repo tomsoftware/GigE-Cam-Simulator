@@ -1,35 +1,10 @@
-﻿using Microsoft.VisualBasic;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GigE_Cam_Simulator
+﻿namespace GigE_Cam_Simulator
 {
-    public enum PackageCommandType
-    {
-        DISCOVERY_CMD = 0x0002,
-        DISCOVERY_ACK = 0x0003,
-        FORCEIP_CMD = 0x0004,
-        FORCEIP_ACK = 0x0005,
-        //Streaming Protocol Control
-        PACKETRESEND_CMD = 0x0040,
-        //Device Memory Access
-        READREG_CMD = 0x0080,
-        READREG_ACK = 0x0081,
-        WRITEREG_CMD = 0x0082,
-        WRITEREG_ACK = 0x0083,
-        READMEM_CMD = 0x0084,
-        READMEM_ACK = 0x0085,
-        WRITEMEM_CMD = 0x0086,
-        WRITEMEM_ACK = 0x0087,
-        PENDING_ACK = 0x0089,
-    }
+    using System.Net;
+    using System.Net.NetworkInformation;
+    using System.Net.Sockets;
+    using GigE_Cam_Simulator.Commads;
+    using GigE_Cam_Simulator.Streams;
 
     internal class Server
     {
@@ -41,6 +16,12 @@ namespace GigE_Cam_Simulator
         readonly byte[] xml;
         private NetworkInterface iface;
         private UdpClient server;
+        private StreamClient streamClient = new StreamClient();
+
+        /// <summary>
+        /// Callback that is triggere when ever a new Image need to be acquire
+        /// </summary>
+        private Func<ImageData> onAcquiesceImageCallback;
 
         public Server(string address, string camXmlFileName, RegisterConfig preSetMemory)
         {
@@ -48,7 +29,6 @@ namespace GigE_Cam_Simulator
 
             this.GetAllNic(address);
 
-            this.FillTestImage();
 
             this.registers = new RegisterMemory(1024 * 1024 * 68); // 68MB Register
 
@@ -59,53 +39,53 @@ namespace GigE_Cam_Simulator
 
         private void InitRegisters(RegisterConfig preSetMemory)
         {
-            this.registers.SetIntBE(RegisterTypes.Version, 0x0100);
+            this.registers.WriteIntBE(RegisterTypes.Version, 0x0100);
 
-            this.registers.SetBit(RegisterTypes.Device_Mode, 0, true);
-            this.registers.SetBit(RegisterTypes.Device_Mode, 1, true);
-            this.registers.SetByte(RegisterTypes.Device_Mode, 0, 1);
-            this.registers.SetByte(RegisterTypes.Device_Mode, 2, 1);
+            this.registers.WriteBit(RegisterTypes.Device_Mode, 0, true);
+            this.registers.WriteBit(RegisterTypes.Device_Mode, 1, true);
+            this.registers.ReadByte(RegisterTypes.Device_Mode, 0, 1);
+            this.registers.ReadByte(RegisterTypes.Device_Mode, 2, 1);
 
             // set MAC
             var ipInfo = this.GetIpInfo();
             var macAddress = this.iface.GetPhysicalAddress().GetAddressBytes();
             for (var i = 0; i < 2; i++)
             {
-                this.registers.SetByte(RegisterTypes.Device_MAC_address_High_Network_interface_0, i + 2, macAddress[i]);
+                this.registers.ReadByte(RegisterTypes.Device_MAC_address_High_Network_interface_0, i + 2, macAddress[i]);
             }
             for (var i = 2; i < 6; i++)
             {
-                this.registers.SetByte(RegisterTypes.Device_MAC_address_Low_Network_interface_0, i - 2, macAddress[i]);
+                this.registers.ReadByte(RegisterTypes.Device_MAC_address_Low_Network_interface_0, i - 2, macAddress[i]);
             }
 
             // set IP and network addresses
-            this.registers.SetBytes(RegisterTypes.Current_IP_address_Network_interface_0, ipInfo.Address.GetAddressBytes());
-            this.registers.SetBytes(RegisterTypes.Current_subnet_mask_Network_interface_0, ipInfo.IPv4Mask.GetAddressBytes());
-            this.registers.SetIntBE(RegisterTypes.Number_of_network_interfaces, 1);
-            this.registers.SetBytes(RegisterTypes.Primary_Application_IP_address, ipInfo.Address.GetAddressBytes()); //set IP
+            this.registers.WriteBytes(RegisterTypes.Current_IP_address_Network_interface_0, ipInfo.Address.GetAddressBytes());
+            this.registers.WriteBytes(RegisterTypes.Current_subnet_mask_Network_interface_0, ipInfo.IPv4Mask.GetAddressBytes());
+            this.registers.WriteIntBE(RegisterTypes.Number_of_network_interfaces, 1);
+            this.registers.WriteBytes(RegisterTypes.Primary_Application_IP_address, ipInfo.Address.GetAddressBytes()); //set IP
 
             foreach (var property in preSetMemory.Properties)
             {
                 if (property.IsString)
                 {
-                    this.registers.SetString(property.Register, property.StringValue);
+                    this.registers.WriteString(property.Register, property.StringValue);
                 }
                 else if (property.IsBits)
                 {
                     foreach(var bitIndex in property.Bits)
                     {
-                        this.registers.SetBit(property.Register, bitIndex, true);
+                        this.registers.WriteBit(property.RegisterAddress, bitIndex, true);
                     }
                 }
                 else if (property.IsInt)
                 {
-                    this.registers.SetIntBE(property.Register, property.IntValue);
+                    this.registers.WriteIntBE(property.RegisterAddress, property.IntValue);
                 }
             }
 
             // xml manifest / description
             var manifestFileaddress = 0x1C400;
-            this.registers.SetString(RegisterTypes.XML_Device_Description_File_First_URL, "Local:camera.xml;" + ToHexString(manifestFileaddress) + ";" + ToHexString(this.xml.Length));
+            this.registers.WriteString(RegisterTypes.XML_Device_Description_File_First_URL, "Local:camera.xml;" + ToHexString(manifestFileaddress) + ";" + ToHexString(this.xml.Length));
             this.registers.WriteBytes(manifestFileaddress, this.xml);
         }
 
@@ -212,18 +192,6 @@ namespace GigE_Cam_Simulator
         {
         }
 
-        private void FillTestImage()
-        {
-            /*
-            var len = this.imageWidth * this.imageHeight;
-            var colorShift = 255.0 / this.imageHeight;
-            for (var i = 0; i < len; i++)
-            {
-                this.mat[i] = (i % 2 == 1) ? (byte)55 : (byte)(colorShift * Math.Floor((double)i / this.imageWidth));
-            }
-            */
-        }
-
         private void GetAllNic(string address)
         {
             var ifaces = System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces();
@@ -253,6 +221,75 @@ namespace GigE_Cam_Simulator
             }
         }
 
+        public void OnRegisterChanged(RegisterTypes register, Action<RegisterMemory> callback)
+        {
+            var reg = RegisterTypeHelper.RegisterByType(register);
+            this.registers.AddWriteRegisterHock(reg.Address, callback);
+        }
 
+
+        public void OnRegisterChanged(int address, Action<RegisterMemory> callback)
+        {
+            this.registers.AddWriteRegisterHock(address, callback);
+        }
+
+        private Timer acquisitionTimer;
+
+        public void StartAcquisition(int interval)
+        {
+            if (this.acquisitionTimer == null)
+            {
+                this.acquisitionTimer = new Timer(OnAcquisitionCallback, null, Timeout.Infinite, Timeout.Infinite); 
+            }
+
+            OnAcquisitionCallback(null);
+        }
+
+        private void OnAcquisitionCallback(object source)
+        {
+            if (this.onAcquiesceImageCallback == null)
+            {
+                return;
+            }
+
+            var imageData = this.onAcquiesceImageCallback();
+            if (imageData != null)
+            {
+                return;
+            }
+
+            var ip = this.registers.ReadIntBE(RegisterTypes.Stream_Channel_Destination_Address_0);
+            var port = this.registers.ReadIntBE( RegisterTypes.Stream_Channel_Port_0);
+            var packetSize = this.registers.ReadIntBE(RegisterTypes.Stream_Channel_Packet_Size_0);
+            this.streamClient.Send(imageData, ip, port, (int)packetSize);
+
+            // enqueue next call
+            var timer = this.acquisitionTimer;
+            if (timer != null)
+            {
+                timer.Change(100, Timeout.Infinite);
+            }
+          
+        }
+
+        public void StopAcquisition()
+        {
+            var timer = this.acquisitionTimer;
+            this.acquisitionTimer = null;
+            if (timer == null)
+            {
+                return;
+            }
+
+            timer.Change(Timeout.Infinite, Timeout.Infinite);
+        }
+
+        /// <summary>
+        /// Set callback for Image acquiring
+        /// </summary>
+        internal void OnAcquiesceImage(Func<ImageData> callback)
+        {
+            this.onAcquiesceImageCallback = callback;
+        }
     }
 }
