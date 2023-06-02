@@ -14,18 +14,20 @@ namespace GigE_Cam_Simulator
 
             var server = new Server(cameraXml, preSetMemory);
 
+
             server.OnRegisterChanged(RegisterTypes.Stream_Channel_Packet_Size_0, (mem) =>
             {
                 // mem.WriteIntBE(0x128, 17301505); // PixelFormatRegister 
                 // mem.WriteIntBE(0x104, 500); // HeightRegister 
-
-                if (mem.ReadIntBE(RegisterTypes.Stream_Channel_Packet_Size_0) != 1400)
-                {
-                    mem.WriteIntBE(RegisterTypes.Stream_Channel_Packet_Size_0, 1400);
-                }
+               
+                //if (mem.ReadIntBE(RegisterTypes.Stream_Channel_Packet_Size_0) != 2080)
+                //{
+                //    mem.WriteIntBE(RegisterTypes.Stream_Channel_Packet_Size_0, 2080);
+                // }
             });
 
-            server.OnRegisterChanged(0x124, (mem) =>
+            // on TriggerSoftware
+            server.OnRegisterChanged(0x30c, (mem) =>
             {
                 if (mem.ReadIntBE(0x124) == 1)
                 {
@@ -37,14 +39,19 @@ namespace GigE_Cam_Simulator
                     Console.WriteLine("--- StopAcquisition");
                     server.StopAcquisition();
                 }
-                
             });
 
-            var imageData = ImageData.FormFile(Path.Combine(path, "left01.jpg"));
+            var imageData = new ImageData[13];
+            for (int i = 0; i < 13; i++)
+            {
+                imageData[i] = ImageData.FormFile(Path.Combine(path, "left" + i.ToString().PadLeft(2, '0') + ".jpg"));
+            }
 
+            var imageIndex = 0;
             server.OnAcquiesceImage(() =>
             {
-                return imageData;
+                imageIndex++;
+                return imageData[imageIndex % 13];
             });
 
             server.Run();

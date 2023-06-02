@@ -23,7 +23,7 @@
 
         public void WriteBytes(int address, byte[] values)
         {
-            data.SetBytes(address, values, values.Length);
+            data.SetBytes(address, values, 0, values.Length);
             this.TriggerWriteHock(address);
         }
 
@@ -69,7 +69,7 @@
             var l = Math.Min(values.Length, reg.Length);
 
             // fill in data
-            this.data.SetBytes(address, values, l);
+            this.data.SetBytes(address, values, 0, l);
             
             // clear buffer
             this.data.SetNull(address + l, l - reg.Length);

@@ -1,8 +1,6 @@
 ﻿namespace GigE_Cam_Simulator
 {
     using System.Drawing;
-    using System.Drawing.Imaging;
-    using System.Runtime.InteropServices;
 
     public class ImageData
     {
@@ -25,26 +23,29 @@
             byte[] bytes;
             int width = 0;
             int height = 0;
-            int stride = 0;
 
-            using (var bitmap = new Bitmap(fileName))
+            using (var img = new Bitmap(fileName))
             {
-                var bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, bitmap.PixelFormat);
-                var length = bitmapData.Stride * bitmapData.Height;
+                var length = img.Width * img.Height;
 
-                width = bitmap.Width;
-                height = bitmap.Height;
-                stride = bitmapData.Stride;
+                width = img.Width;
+                height = img.Height;
 
                 bytes = new byte[length];
+                for (int y = 0; y < height; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        var pixel = img.GetPixel(x, y);
 
-                // Copy bitmap to byte[]
-                Marshal.Copy(bitmapData.Scan0, bytes, 0, length);
-                bitmap.UnlockBits(bitmapData);
+                        bytes[y * width + x] = (byte)((pixel.R + pixel.G + pixel.B) / 3);
+                    }
+                }
+
             }
 
 
-            return new ImageData(bytes, width, height, stride);
+            return new ImageData(bytes, width, height, width);
         }
     }
 }

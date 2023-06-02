@@ -115,12 +115,11 @@
 
         public BufferReader CreateBuffer(int length)
         {
-            var b = new BufferReader(length + 12);
+            var b = new BufferReader(length + 4 * 2);
 
             b.WriteWordBE(Status);
             b.WriteWordBE(BlockId);
             b.WriteIntBE((uint)PacketFormat << 24 | PacketId);
-            b.WriteIntBE(PacketId);
 
             return b;
 

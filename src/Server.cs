@@ -95,6 +95,11 @@
             return endpoint.Address.Equals(((IPEndPoint)server.Client.LocalEndPoint).Address);
         }
 
+        private string PadTo(string s)
+        {
+            return s.PadRight(36);
+        }
+
         private void IncommingMessage(IAsyncResult res)
         {
             var server = (UdpClient)res.AsyncState;
@@ -132,23 +137,23 @@
                     result = discovery.ToBuffer();
                     break;
                 case PackageCommandType.READREG_CMD:
-                    Console.WriteLine("READREG by: " + endpoint);
+                    Console.Write(PadTo("READREG by: " + endpoint));
                     var readReg = new ReadRegAck(req_id, this.registers, data);
                     result = readReg.ToBuffer();
                     break;
                 case PackageCommandType.READMEM_CMD:
-                    Console.WriteLine("READMEM by: " + endpoint);
+                    Console.Write(PadTo("READMEM by: " + endpoint));
                     var readMem = new ReadMemAck(req_id, this.registers, data);
                     result = readMem.ToBuffer();
                     break;
                 case PackageCommandType.WRITEREG_CMD:
-                    Console.WriteLine("WRITEREG by: " + endpoint);
+                    Console.Write(PadTo("WRITEREG by: " + endpoint));
                     var writeReg = new WriteRegAck(req_id, this.registers, data);
                     result = writeReg.ToBuffer();
                     break;
                     
                 default:
-                    Console.WriteLine("Unknown GigE Command: " + command);
+                    Console.WriteLine("!!! Unknown GigE Command: " + command);
                     break;
             }
 
@@ -253,15 +258,22 @@
             }
 
             var imageData = this.onAcquiesceImageCallback();
-            if (imageData != null)
+            if (imageData == null)
             {
                 return;
             }
 
-            var ip = this.registers.ReadIntBE(RegisterTypes.Stream_Channel_Destination_Address_0);
+            Console.WriteLine("--- >> send Image: start");
+
+            var ip = this.registers.ReadBytes(RegisterTypes.Stream_Channel_Destination_Address_0);
             var port = this.registers.ReadIntBE( RegisterTypes.Stream_Channel_Port_0);
             var packetSize = this.registers.ReadIntBE(RegisterTypes.Stream_Channel_Packet_Size_0);
-            this.streamClient.Send(imageData, ip, port, (int)packetSize);
+            this.streamClient.Send(imageData, new IPAddress(ip), port, (int)packetSize);
+
+
+            Console.WriteLine("--- << send Image: end");
+
+            return;
 
             // enqueue next call
             var timer = this.acquisitionTimer;

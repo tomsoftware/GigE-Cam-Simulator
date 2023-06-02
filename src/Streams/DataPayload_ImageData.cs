@@ -15,11 +15,11 @@
         {
         }
 
-        public BufferReader ToBuffer(byte[] payload, int offset, int length)
+        public BufferReader ToBuffer(byte[] payload, int payloadOffset, int length)
         {
-            var b = CreateBuffer(payload.Length);
+            var b = CreateBuffer(length);
 
-            b.WriteBytes(payload, payload.Length);
+            b.WriteBytes(payload, length, payloadOffset);
 
             return b;
 
