@@ -94,8 +94,14 @@
 
         public void WriteBytes(byte[] data, int length)
         {
-            this.SetBytes(this.bufferPos, data, length);
+            this.SetBytes(this.bufferPos, data, 0, length);
             this.bufferPos += length;
+        }
+
+        public void WriteBytes(byte[] data, int dataLength, int dataOffset)
+        {
+            this.SetBytes(this.bufferPos, data, dataOffset, dataLength);
+            this.bufferPos += dataLength;
         }
 
         public byte[] ReadBytes(int length)
@@ -106,18 +112,18 @@
         }
 
 
-        public void SetBytes(int offset, byte[] data, int length)
+        public void SetBytes(int offset, byte[] data, int dataOffset, int dataLength)
         {
             if (data == null)
             {
-                Array.Fill(this.buffer, (byte)0, offset, length);
+                Array.Fill(this.buffer, (byte)0, offset, dataLength);
                 return;
             }
 
-            var l = Math.Min(length, data.Length);
-            Array.Copy(data, 0, this.buffer, offset, l);
+            var l = Math.Min(dataLength, data.Length);
+            Array.Copy(data, dataOffset, this.buffer, offset, l);
 
-            var left = length - l;
+            var left = dataLength - l;
             if (left > 0)
             {
                 Array.Fill(this.buffer, (byte)0, offset + l, left);

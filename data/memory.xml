@@ -42,5 +42,25 @@
 		<int>1</int>
 	</property>
 	
+	<property>
+		<register>Stream_Channel_Packet_Size_0</register>
+		<int>1080</int>
+	</property>
+	
+	<property>
+		<register>0x128</register>
+		<int>17301505</int>
+	</property>
+	
+	<property>
+		<register>0x104</register>
+		<int>480</int>
+	</property>
+		
+	<property>
+		<register>0x100</register>
+		<int>640</int>
+	</property>
+	
 	
 </memory>

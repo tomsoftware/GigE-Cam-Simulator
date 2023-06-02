@@ -59,7 +59,6 @@
             manufacturer_info = registers.ReadString(RegisterTypes.Manufacturer_specific_information);
             serial_number = registers.ReadString(RegisterTypes.Serial_number);
             user_defined_name = registers.ReadString(RegisterTypes.User_defined_name);
-
         }
 
         public BufferReader ToBuffer()
