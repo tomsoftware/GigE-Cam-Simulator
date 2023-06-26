@@ -1,8 +1,11 @@
 ﻿namespace GigE_Cam_Simulator
 {
+    using System;
+    using System.IO;
     using System.Net;
     using System.Net.NetworkInformation;
     using System.Net.Sockets;
+    using System.Threading;
     using GigE_Cam_Simulator.Commads;
     using GigE_Cam_Simulator.Streams;
 
@@ -161,7 +164,7 @@
 
             if (result != null)
             {
-                server.Send(result.Buffer, endpoint);
+                server.Send(result.Buffer, result.Buffer.Length, endpoint);
             }
         }
 

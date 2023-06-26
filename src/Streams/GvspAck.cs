@@ -1,4 +1,6 @@
-﻿namespace GigE_Cam_Simulator.Streams
+﻿using System;
+
+namespace GigE_Cam_Simulator.Streams
 {
     [Flags]
     public enum GvspStatusType

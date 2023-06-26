@@ -1,4 +1,6 @@
-﻿namespace GigE_Cam_Simulator.Commads
+﻿using System;
+
+namespace GigE_Cam_Simulator.Commads
 {
 
     /// <summary>

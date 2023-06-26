@@ -1,4 +1,5 @@
-﻿using GigE_Cam_Simulator.Streams;
+﻿using System;
+using System.IO;
 
 namespace GigE_Cam_Simulator
 {
@@ -6,7 +7,7 @@ namespace GigE_Cam_Simulator
     {
         static void Main(string[] args)
         {
-            var path = "D:\\Thomas\\GigE-Cam-simulator\\GigE-Cam-Simulator\\GigE-Cam-Simulator\\data\\";
+            var path = (args.Length > 0) ? args[0] : ".\\data\\" ;
             var cameraXml = Path.Combine(path, "camera.xml");
             var memoryXml = Path.Combine(path, "memory.xml");
 
