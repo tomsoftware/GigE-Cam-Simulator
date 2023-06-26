@@ -1,22 +1,22 @@
-# GigE-Cam-Simulator
+# GigE Camera Simulator
 
-This is a GigE Camera Simulator written in C#
+This is a GigE camera simulator written in C#.
 
-## Features:
-- Discover: after starting this Camera should by answering discovery requests
-- Software trigger: acquire and provide images for software trigger requests
+## Functions:
+- Discover: answering discovery requests
+- Software Trigger: Provide images for software trigger requests.
 
 ## How it works:
-The simulator is a state machine that provides access to a simulated camera memory. A GigE Vision Client can read and write this memory/registers to control the fake camera. 
-When the simulator starts it uses the "data/memory.xml" file to initial write default values to the memory (e.g. "Manufacturer_name" or "image-width"). 
-Also, the camera description file "data/camera.xml" is written to the memory on startup that contains the feature description of the camera.
+The simulator is a state machine that provides access to a simulated camera memory. A GigE Vision client can read and write to this memory/register to control the simulated camera. 
+When the simulator starts, it uses the "data/memory.xml" file to initially write default values to the memory (e.g. "Manufacturer_name" or "image-width"). 
+In addition, the camera description file "data/camera.xml" is written into the memory at start-up, which contains the functional description of the camera.
 
-When the client writes to register 0x30c an image is sent to the client.
+When the client writes to register 0x30c, an image is sent to the client.
 
-## To config your simulator camera you need to:
-- edit "data/memory.xml" to setup memory values
-- edit "data/camera.xml" if you want to change camera features
-- edit "Program.cs" to add logic to your camera and provide image-files
+## To configure your simulator camera, you must:
+- edit the file "data/memory.xml" to set the memory values.
+- edit "data/camera.xml" if you want to change the camera functions
+- edit "program.cs" to add logic to the camera and provide image files
 
 ## Specification
 see:
@@ -28,5 +28,5 @@ https://www.visiononline.org/userAssets/aiaUploads/File/GigE_Vision_Specificatio
 - [Aravis](https://github.com/AravisProject/aravis)
 - [tualo / gigecamera-simulator](https://github.com/tualo/gigecamera-simulator)
 
-see also:
+See also:
 - https://github.com/Strongc/VirtualGEVCam
