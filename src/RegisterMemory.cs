@@ -1,6 +1,7 @@
 ﻿namespace GigE_Cam_Simulator
 {
     using System;
+    using System.Collections.Generic;
     using System.Text;
 
     public class RegisterMemory

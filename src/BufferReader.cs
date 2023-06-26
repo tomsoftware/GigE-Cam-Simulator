@@ -1,5 +1,6 @@
 ﻿namespace GigE_Cam_Simulator
 {
+    using System;
     using System.Collections;
     using System.Text;
 

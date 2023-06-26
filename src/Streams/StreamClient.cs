@@ -1,5 +1,6 @@
 ﻿namespace GigE_Cam_Simulator.Streams
 {
+    using System;
     using System.Net;
     using System.Net.Sockets;
 

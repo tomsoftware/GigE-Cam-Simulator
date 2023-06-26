@@ -1,5 +1,6 @@
 ﻿namespace GigE_Cam_Simulator
 {
+    using SkiaSharp;
     using System.Drawing;
 
     public class ImageData
@@ -24,7 +25,7 @@
             int width = 0;
             int height = 0;
 
-            using (var img = new Bitmap(fileName))
+            using (var img = SKBitmap.Decode(fileName))
             {
                 var length = img.Width * img.Height;
 
@@ -38,7 +39,7 @@
                     {
                         var pixel = img.GetPixel(x, y);
 
-                        bytes[y * width + x] = (byte)((pixel.R + pixel.G + pixel.B) / 3);
+                        bytes[y * width + x] = (byte)((pixel.Red + pixel.Green + pixel.Blue) / 3);
                     }
                 }
 

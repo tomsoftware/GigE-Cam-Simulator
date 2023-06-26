@@ -1,4 +1,6 @@
-﻿namespace GigE_Cam_Simulator.Commads
+﻿using System;
+
+namespace GigE_Cam_Simulator.Commads
 {
     /// <summary>
     /// https://www.visiononline.org/userAssets/aiaUploads/File/GigE_Vision_Specification_2-0-03.pdf
